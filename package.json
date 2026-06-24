@@ -1,6 +1,6 @@
 {
   "name": "@long.dg/le-restaurant",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Install the brigade of agent skills into your project, translated for your coding agent.",
   "type": "module",
   "publishConfig": {
