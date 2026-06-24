@@ -18,10 +18,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # NOTE: do NOT set registry-url here — it writes an .npmrc that forces
+      # token auth (_authToken=${NODE_AUTH_TOKEN}) and blocks OIDC detection.
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          registry-url: https://registry.npmjs.org
 
       - name: Upgrade npm to a version that supports trusted publishing
         run: npm install -g npm@latest # trusted publishing needs npm >= 11.5.1
