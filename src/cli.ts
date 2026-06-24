@@ -7,8 +7,11 @@ import { loadSkills } from "./registry.js";
 import { renderSummary } from "./summary.js";
 import type { ConflictPolicy, InstallContext, Skill } from "./types.js";
 import { writeOutputs, type WriteResult } from "./writer.js";
+import pkg from "../package.json" with { type: "json" };
 
-const VERSION = "0.1.0";
+// Single source of truth: the published package version. `tsup` inlines this at
+// build time, so `npm version` bumping package.json is all that's needed.
+const VERSION = pkg.version;
 
 /** The agents we can install for. */
 export type AgentId = "claude" | "codex" | "gemini";
