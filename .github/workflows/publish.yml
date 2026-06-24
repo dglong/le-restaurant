@@ -39,11 +39,4 @@ jobs:
         run: npm test
 
       - name: Publish to npm (trusted publishing / OIDC)
-        run: |
-          echo "npm version: $(npm --version)"
-          echo "--- userconfig .npmrc ---"
-          cat "$NPM_CONFIG_USERCONFIG" 2>/dev/null || echo "(none)"
-          npm publish --access public --loglevel verbose || status=$?
-          echo "=== oidc / auth lines from debug log ==="
-          grep -iE "oidc|id-token|trusted|provenance|authToken|need auth|forbidden|404" ~/.npm/_logs/*-debug-0.log | tail -60 || true
-          exit ${status:-0}
+        run: npm publish --access public
