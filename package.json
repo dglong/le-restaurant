@@ -32,6 +32,14 @@
     "skills",
     "cli"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dglong/le-restaurant.git"
+  },
+  "homepage": "https://github.com/dglong/le-restaurant#readme",
+  "bugs": {
+    "url": "https://github.com/dglong/le-restaurant/issues"
+  },
   "author": "",
   "license": "MIT",
   "dependencies": {

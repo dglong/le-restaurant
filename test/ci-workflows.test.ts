@@ -35,13 +35,16 @@ describe("publish workflow (.github/workflows/publish.yml)", () => {
     expect(publish).toContain("npm test");
   });
 
-  it("publishes to npm with provenance using the NPM_TOKEN secret", () => {
+  it("publishes to npm", () => {
     expect(publish).toContain("npm publish");
-    expect(publish).toContain("--provenance");
-    expect(publish).toContain("NPM_TOKEN");
   });
 
-  it("grants id-token write permission required for provenance", () => {
+  it("uses OIDC trusted publishing — no stored token", () => {
+    expect(publish).not.toContain("NODE_AUTH_TOKEN");
+    expect(publish).not.toContain("secrets.");
+  });
+
+  it("grants id-token write permission required for OIDC + provenance", () => {
     expect(publish).toMatch(/id-token:\s*write/);
   });
 });

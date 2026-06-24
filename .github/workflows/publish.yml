@@ -1,7 +1,9 @@
 name: Publish
 
-# Publishes to npm when a version tag (e.g. v1.2.3) is pushed.
-# Requires the NPM_TOKEN repo secret. Provenance needs id-token: write.
+# Publishes to npm on a version tag (e.g. v1.2.3) using npm Trusted Publishing
+# (OIDC) — no stored registry token. The package's trusted publisher must be
+# configured on npmjs.com to point at this repo + workflow filename (publish.yml).
+# Provenance is generated automatically under OIDC, so no --provenance flag.
 on:
   push:
     tags:
@@ -12,15 +14,17 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write # required for npm provenance
+      id-token: write # required for OIDC trusted publishing (and provenance)
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: npm
+          node-version: 22
           registry-url: https://registry.npmjs.org
+
+      - name: Upgrade npm to a version that supports trusted publishing
+        run: npm install -g npm@latest # trusted publishing needs npm >= 11.5.1
 
       - name: Install dependencies
         run: npm ci
@@ -34,7 +38,5 @@ jobs:
       - name: Test
         run: npm test
 
-      - name: Publish to npm
-        run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Publish to npm (trusted publishing / OIDC)
+        run: npm publish --access public
