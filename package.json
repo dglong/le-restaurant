@@ -4,11 +4,10 @@
   "description": "Install the brigade of agent skills into your project, translated for your coding agent.",
   "type": "module",
   "publishConfig": {
-    "access": "public",
-    "provenance": true
+    "access": "public"
   },
   "bin": {
-    "le-restaurant": "./dist/cli.js"
+    "le-restaurant": "dist/cli.js"
   },
   "main": "./dist/index.js",
   "module": "./dist/index.js",

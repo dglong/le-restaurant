@@ -26,7 +26,7 @@ describe("package.json packaging config", () => {
   });
 
   it("exposes the CLI binary from the built output", () => {
-    expect(pkg.bin).toEqual({ "le-restaurant": "./dist/cli.js" });
+    expect(pkg.bin).toEqual({ "le-restaurant": "dist/cli.js" });
   });
 });
 
