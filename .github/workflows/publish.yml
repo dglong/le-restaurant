@@ -18,13 +18,10 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      # Deliberately NO registry-url: setting it makes setup-node inject a dummy
-      # auth placeholder into .npmrc, which npm uses instead of OIDC and gets
-      # rejected (E404). With clean config + npm >= 11.5.1, npm publishes to the
-      # default registry and auto-detects OIDC trusted publishing.
       - uses: actions/setup-node@v6
         with:
           node-version: 22
+          registry-url: https://registry.npmjs.org
 
       - name: Upgrade npm to a version that supports trusted publishing
         run: npm install -g npm@latest # trusted publishing needs npm >= 11.5.1
@@ -44,5 +41,9 @@ jobs:
       - name: Publish to npm (trusted publishing / OIDC)
         run: |
           echo "npm version: $(npm --version)"
-          echo "OIDC request url present: ${ACTIONS_ID_TOKEN_REQUEST_URL:+yes}"
-          npm publish --access public
+          echo "--- userconfig .npmrc ---"
+          cat "$NPM_CONFIG_USERCONFIG" 2>/dev/null || echo "(none)"
+          npm publish --access public --loglevel verbose || status=$?
+          echo "=== oidc / auth lines from debug log ==="
+          grep -iE "oidc|id-token|trusted|provenance|authToken|need auth|forbidden|404" ~/.npm/_logs/*-debug-0.log | tail -60 || true
+          exit ${status:-0}
