@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@v4
 
       # NOTE: do NOT set registry-url here — it writes an .npmrc that forces
-      # token auth (_authToken=${NODE_AUTH_TOKEN}) and blocks OIDC detection.
+      # registry token auth and blocks OIDC trusted-publishing detection.
       - uses: actions/setup-node@v4
         with:
           node-version: 22
