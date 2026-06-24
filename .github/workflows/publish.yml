@@ -16,13 +16,14 @@ jobs:
       contents: read
       id-token: write # required for OIDC trusted publishing (and provenance)
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      # NOTE: do NOT set registry-url here — it writes an .npmrc that forces
-      # registry token auth and blocks OIDC trusted-publishing detection.
-      - uses: actions/setup-node@v4
+      # setup-node@v6 is OIDC-aware: with registry-url set (and no token) it
+      # configures the registry without breaking trusted-publishing detection.
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
+          registry-url: https://registry.npmjs.org
 
       - name: Upgrade npm to a version that supports trusted publishing
         run: npm install -g npm@latest # trusted publishing needs npm >= 11.5.1
