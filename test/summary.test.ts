@@ -38,6 +38,23 @@ describe("renderSummary", () => {
     expect(out.toLowerCase()).toContain("always-on");
   });
 
+  it("includes the model-selection no-op notice for Codex", () => {
+    const out = renderSummary({ agentId: "codex", agentLabel: "Codex", results });
+    expect(out.toLowerCase()).toContain("no-op");
+    expect(out.toLowerCase()).toContain("model");
+  });
+
+  it("includes the model-selection no-op notice for Gemini", () => {
+    const out = renderSummary({ agentId: "gemini", agentLabel: "Gemini", results });
+    expect(out.toLowerCase()).toContain("no-op");
+    expect(out.toLowerCase()).toContain("model");
+  });
+
+  it("does NOT show the model-selection no-op notice for Claude", () => {
+    const out = renderSummary({ agentId: "claude", agentLabel: "Claude Code", results });
+    expect(out.toLowerCase()).not.toContain("no-op");
+  });
+
   it("does NOT show the always-on caveat for Claude (skills trigger on demand)", () => {
     const out = renderSummary({
       agentId: "claude",

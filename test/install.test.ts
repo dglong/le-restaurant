@@ -12,10 +12,16 @@ beforeEach(() => {
   // keep the test output quiet
   vi.spyOn(console, "log").mockImplementation(() => {});
   vi.spyOn(console, "error").mockImplementation(() => {});
+  // stub global fetch so `check` never makes a live network call in tests
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
+    ok: true,
+    json: vi.fn().mockResolvedValue({ version: "0.1.1" }),
+  }));
 });
 
 afterEach(() => {
   vi.restoreAllMocks();
+  vi.unstubAllGlobals();
   rmSync(dir, { recursive: true, force: true });
 });
 
@@ -39,6 +45,23 @@ describe("runInstall", () => {
     expect(
       existsSync(join(dir, ".claude", "skills", first, "SKILL.md")),
     ).toBe(true);
+  });
+});
+
+describe("runCli check subcommand", () => {
+  it("exits 0 and prints a not-installed message when no manifest exists", async () => {
+    const consoleSpy = vi.spyOn(console, "log");
+    const code = await runCli(["node", "cli", "check", dir]);
+    expect(code).toBe(0);
+    // clack's note() writes to stdout via process.stdout; we check it doesn't throw
+    consoleSpy.mockRestore();
+  });
+
+  it("exits 0 and prints up-to-date status after a fresh install", async () => {
+    const skills = loadSkills();
+    runInstall({ agentId: "codex", skills, targetDir: dir });
+    const code = await runCli(["node", "cli", "check", dir]);
+    expect(code).toBe(0);
   });
 });
 

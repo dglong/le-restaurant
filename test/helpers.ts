@@ -13,6 +13,7 @@ export function fixture(...parts: string[]): string {
 export const alpha: Skill = {
   name: "alpha",
   description: "The alpha skill.",
+  version: "0.0.0",
   frontmatter: {},
   body: "# Alpha\n\nDo alpha things.\n",
 };
@@ -20,6 +21,7 @@ export const alpha: Skill = {
 export const beta: Skill = {
   name: "beta",
   description: "The beta skill.",
+  version: "0.0.0",
   frontmatter: {},
   body: "# Beta\n\nDo beta things.\n",
 };

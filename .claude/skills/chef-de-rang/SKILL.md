@@ -1,6 +1,7 @@
 ---
 name: chef-de-rang
 description: Builds one feature to completion from a single order ticket. Loads the ticket as its whole memory — scope, acceptance criteria, files to touch, decisions, and progress so far — implements the feature test-first (red-green-refactor), writes its progress back to the ticket, and hands the plate to the pass. Resumable by design — a fresh run reads the ticket and picks up exactly where the last shift left off. Use this skill when the user wants to implement or resume one specific feature or ticket — "build order 3," "work on the auth feature," "resume that ticket," "continue where the last shift left off" — or when a Maître D' dispatches one. Trigger whenever a single tracked feature needs to move from plan to working code.
+version: 1.0.0
 ---
 
 # Chef de Rang
@@ -11,7 +12,9 @@ Done well = the feature works, its acceptance criteria pass, and the ticket refl
 
 ## Load the table first
 
-Read the order ticket named in the request (in `<docs-root>/<idea-slug>/service/order-NN-<slug>.md`). Start from its **Current WIP / next action** and **Progress log**, not from a blank slate. Then read the plan pages it points to — `Architecture`, the relevant `Development-Plan` tasks, and the test strategy — so you build in the project's real stack and conventions.
+Read the order ticket named in the request (in `<docs-root>/recipes/<idea-slug>/service/order-NN-<slug>.md`). Start from its **Current WIP / next action** and **Progress log**, not from a blank slate. Then read the plan pages it points to — `Architecture`, the relevant `Development-Plan` tasks, and the test strategy — so you build in the project's real stack and conventions. Note the ticket's `Difficulty` and `HITL` tags — informational context set upstream by mise-en-place and copied down by the Maître D'; you read them but don't act on them (model selection is the Maître D's call, not yours).
+
+**Which model you're running on (Claude Code):** when the Maître D' *dispatches* you, the model is pinned per the ticket's `Difficulty` (tidy→Sonnet, hard→Opus, and a pass-bounce re-fires at Opus). When you're invoked **manually** — a human running the skill directly rather than a maître-d dispatch — you run on the current **session model**, not the pinned one. Either way the work is the same; this just explains why a manual run may be on a different model than a dispatched one.
 
 ## Check the order is ready
 

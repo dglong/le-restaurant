@@ -33,6 +33,9 @@ function usageNotes(agentId: SummaryInput["agentId"]): string[] {
         "Caveat: Codex has no skill system, so this guidance is ALWAYS-ON —",
         "there is no on-demand triggering. Every section is in context all the",
         "time, unlike Claude Code's on-demand skills.",
+        "Note: Model-aware dispatch (Sonnet/Opus selection) is a no-op —",
+        "chef-de-rang runs on the session model. The HITL gate and difficulty",
+        "tagging still apply.",
       ];
     case "gemini":
       return [
@@ -41,6 +44,9 @@ function usageNotes(agentId: SummaryInput["agentId"]): string[] {
         "Caveat: Gemini has no skill system, so this guidance is ALWAYS-ON —",
         "there is no on-demand triggering. Every imported skill is in context",
         "all the time, unlike Claude Code's on-demand skills.",
+        "Note: Model-aware dispatch (Sonnet/Opus selection) is a no-op —",
+        "chef-de-rang runs on the session model. The HITL gate and difficulty",
+        "tagging still apply.",
       ];
   }
 }

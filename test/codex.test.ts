@@ -36,6 +36,21 @@ describe("codex merge adapter", () => {
     expect(outputs[0].contents).toBe(golden);
   });
 
+  it("each skill section carries the skill version", () => {
+    const outputs = codexAdapter.translate([alpha, beta], ctxFor("merge"));
+    // alpha and beta both have version "0.0.0" — it must appear in the content.
+    expect(outputs[0].contents).toContain("v0.0.0");
+  });
+
+  it("contains the model-aware dispatch no-op notice", () => {
+    const outputs = codexAdapter.translate([alpha, beta], ctxFor("merge"));
+    expect(outputs[0].contents.toLowerCase()).toContain("model-aware dispatch");
+    expect(outputs[0].contents.toLowerCase()).toContain("no-op");
+    // HITL guidance still present, session-model acknowledged
+    expect(outputs[0].contents.toLowerCase()).toContain("hitl");
+    expect(outputs[0].contents.toLowerCase()).toContain("session model");
+  });
+
   it("re-run updates between markers without touching surrounding user content", () => {
     const agents = join(target, "AGENTS.md");
     const userTop = "# My project\n\nMy own AGENTS guidance.\n\n";

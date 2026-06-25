@@ -1,12 +1,16 @@
+import { existsSync, readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { log, note } from "@clack/prompts";
 import { Command, CommanderError } from "commander";
 import { claudeAdapter } from "./adapters/claude.js";
 import { codexAdapter } from "./adapters/codex.js";
 import { geminiAdapter } from "./adapters/gemini.js";
 import type { Adapter } from "./adapters/types.js";
+import { checkNpmFreshness, checkSkills, fetchLatestNpmVersion } from "./check.js";
 import { loadSkills } from "./registry.js";
 import { renderSummary } from "./summary.js";
-import type { ConflictPolicy, InstallContext, Skill } from "./types.js";
-import { writeOutputs, type WriteResult } from "./writer.js";
+import type { ConflictPolicy, InstallContext, InstallManifest, Skill } from "./types.js";
+import { writeManifest, writeOutputs, type WriteResult } from "./writer.js";
 import pkg from "../package.json" with { type: "json" };
 
 // Single source of truth: the published package version. `tsup` inlines this at
@@ -116,6 +120,18 @@ export function runInstall(req: InstallRequest): {
   };
   const outputs = adapter.translate(req.skills, ctx);
   const results = writeOutputs(outputs, ctx);
+
+  // Write the uniform manifest so `check` can read it regardless of adapter.
+  writeManifest(
+    {
+      package: VERSION,
+      agent: req.agentId,
+      installedAt: new Date().toISOString().split("T")[0],
+      skills: Object.fromEntries(req.skills.map((s) => [s.name, s.version])),
+    },
+    req.targetDir,
+  );
+
   return { adapter, results };
 }
 
@@ -208,6 +224,67 @@ export function buildProgram(): Command {
       const skills = loadSkills();
       for (const skill of skills) {
         console.log(`- ${skill.name}: ${skill.description}`);
+      }
+    });
+
+  program
+    .command("check")
+    .description(
+      "Check installed skills for staleness against the bundled package versions.",
+    )
+    .argument("[targetDir]", "project directory to check", ".")
+    .action(async (targetDir: string) => {
+      const manifestPath = resolve(targetDir, ".le-restaurant.json");
+
+      if (!existsSync(manifestPath)) {
+        note(
+          `No .le-restaurant.json found in ${resolve(targetDir)}.\nRun \`le-restaurant\` in this directory first.`,
+          "not installed here",
+        );
+        return;
+      }
+
+      const manifest = JSON.parse(
+        readFileSync(manifestPath, "utf8"),
+      ) as InstallManifest;
+
+      const bundled = Object.fromEntries(
+        loadSkills().map((s) => [s.name, s.version]),
+      );
+
+      const results = checkSkills(manifest, bundled);
+
+      if (results.length === 0) {
+        note("No skills recorded in the manifest.", "check");
+        return;
+      }
+
+      for (const r of results) {
+        const label = `${r.name} (installed: ${r.installedVersion}, bundled: ${r.bundledVersion ?? "—"})`;
+        if (r.status === "up-to-date") {
+          log.success(`up-to-date  ${label}`);
+        } else if (r.status === "stale (local)") {
+          log.warn(`stale (local)  ${label}`);
+        } else {
+          log.info(`unknown  ${label}`);
+        }
+      }
+
+      // --- npm freshness (A3) ---
+      // Fetch the latest published version from the registry. On network
+      // failure `fetchLatestNpmVersion` returns null — fall back to local-only
+      // results and emit a short notice. Always exits 0.
+      const latestNpmVersion = await fetchLatestNpmVersion(pkg.name);
+      if (latestNpmVersion === null) {
+        log.warn("npm registry unreachable — local results only");
+      } else {
+        const npmKind = checkNpmFreshness(manifest.package, latestNpmVersion);
+        const pkgLabel = `package (installed: ${manifest.package}, latest: ${latestNpmVersion})`;
+        if (npmKind === "update available (npm)") {
+          log.warn(`update available (npm)  ${pkgLabel}`);
+        } else {
+          log.success(`up-to-date (npm)  ${pkgLabel}`);
+        }
       }
     });
 

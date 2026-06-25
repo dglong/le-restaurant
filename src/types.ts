@@ -9,6 +9,8 @@ export interface Skill {
   name: string;
   /** One-line description from frontmatter. */
   description: string;
+  /** Semver string from frontmatter; defaults to "0.0.0" with a warning if absent. */
+  version: string;
   /** Full parsed frontmatter as a key/value map. */
   frontmatter: Record<string, unknown>;
   /** The markdown body after the frontmatter, verbatim. */
@@ -38,6 +40,21 @@ export interface FileOutput {
 
 /** How the writer resolves a collision with an existing file. */
 export type ConflictPolicy = "skip" | "overwrite" | "merge";
+
+/**
+ * The manifest written to `.le-restaurant.json` in the target project after
+ * install. Uniform across all agents — one place for `check` to read.
+ */
+export interface InstallManifest {
+  /** The le-restaurant package version that performed this install. */
+  package: string;
+  /** Which adapter ran: "claude" | "codex" | "gemini". */
+  agent: string;
+  /** ISO calendar date of the install, e.g. "2026-06-25". */
+  installedAt: string;
+  /** Per-skill semver map: { "<skill-name>": "<semver>" }. */
+  skills: Record<string, string>;
+}
 
 /** Everything an adapter needs to know to translate a set of skills. */
 export interface InstallContext {

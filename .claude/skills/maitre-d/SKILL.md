@@ -1,6 +1,7 @@
 ---
 name: maitre-d
 description: Front-of-house orchestrator for building a planned project. Reads a mise-en-place plan wiki, cuts it into per-feature "order tickets," and runs service one course at a time — fires the next ready ticket, sends a chef-de-rang to build it, then works the pass to verify the feature is done before moving on. The natural follow-up once a build plan exists. Use this skill whenever the user wants to start or continue implementing a planned project — "let's build this," "start development," "what's next to build," "continue the build," "run the implementation," "work through the plan" — or hands over a plan folder and asks to execute it. Trigger it even without the word "build" when the user is moving from a finished plan toward shipping code.
+version: 1.0.0
 ---
 
 # Maître D'
@@ -21,14 +22,14 @@ Find the plan: scan the docs root for a `<slug>/plan/` wiki (`mise-en-place` out
 
 ## The service layer
 
-Everything lives in `<docs-root>/<idea-slug>/service/`, beside `plan/` and `recipe.md`, so one idea stays in one folder:
+Everything lives in `<docs-root>/recipes/<idea-slug>/service/`, beside `plan/` and `recipe.md`, so one idea stays in one folder:
 - `Board.md` — the floor at a glance: every ticket, its status, and the course order.
 - `order-NN-<slug>.md` — one ticket per feature/phase. The unit of work **and** its memory.
 
 ## Flow
 
 ### 1. Seat the room (first run)
-From `Phases.md` and `Development-Plan.md`, cut the work into tickets — usually one per phase or coherent feature. Seed each ticket straight from the plan: its tasks, their **Done when** criteria, and **Touches** list. Write `Board.md` with the course order, respecting dependencies.
+From `Phases.md` and `Development-Plan.md`, cut the work into tickets — usually one per phase or coherent feature. Seed each ticket straight from the plan: its tasks, their **Done when** criteria, and **Touches** list, and its `Difficulty` and `HITL` tags — authored by mise-en-place, they travel to the ticket unchanged. Write `Board.md` with the course order, respecting dependencies.
 
 **Resolve shared surfaces up front.** Scan every ticket's **Touches** for shared surfaces the plan already names — routing, shared services/types, the component library, build config. Don't leave these to be discovered mid-cook: pre-own or pre-stub them now (e.g. register a route placeholder, declare a shared interface) so a chef-de-rang is never blocked halfway through a course by something the plan already foresaw. Only genuinely *unforeseen* shared needs should surface as a mid-cook escalation.
 
@@ -38,7 +39,13 @@ Show the breakdown — tickets, course order, and the shared surfaces you're hol
 Some surfaces are shared — routing, shared services/types, the component library, build config. The Maître D' holds these. When a ticket needs a cross-cutting change, it's made deliberately (at seating or at the pass), not buried inside one feature. Note shared touches on the ticket so nothing collides. When a shared decision is non-obvious, log it in the plan's `Decisions & Glossary` (ADR log) so the *why* outlives the build — a ticket's local **Decisions** are fine for feature-scoped choices, but cross-cutting ones graduate to the plan.
 
 ### 3. Fire the next ticket
-Pick the next ticket whose dependencies are **Served** and whose **Definition of Ready** is met (criteria + touches present, no blocking unknown). If it isn't ready, fix the ticket first — never fire a vague order. Set Status → **Firing**, then send a `chef-de-rang` with the ticket path and the plan pages it points to.
+Pick the next ticket whose dependencies are **Served** and whose **Definition of Ready** is met (criteria + touches present, no blocking unknown). If it isn't ready, fix the ticket first — never fire a vague order. If the ticket carries `HITL: yes`, pause and ask the human for explicit go-ahead before proceeding — do not fire until you have it. Set Status → **Firing**, then dispatch a `chef-de-rang` **as a subagent** (its own isolated context — not inline in your own) with the ticket path and the plan pages it points to.
+
+**Pick the model — Claude Code only.** On Claude Code the install ships a `chef-de-rang` agent definition pinned to `model: sonnet`, so the cheap default is enforced by config. Map the ticket's `Difficulty` tag to the model you dispatch with:
+- `Difficulty: tidy` → **Sonnet** (the agent definition's default; dispatch as-is).
+- `Difficulty: hard` → **Opus** (override the model on this dispatch; the per-call model takes precedence over the frontmatter default).
+
+This switch is Claude-Code-only — only its format expresses a model-pinned subagent with a per-dispatch override. On Codex/Gemini it's a documented no-op: the chef-de-rang runs on the session model, and only the HITL gate and tagging carry over. Note too that a **manual** invocation of chef-de-rang (a human running the skill directly, not a maître-d dispatch) runs on the session model — the pinned model applies only when *you* dispatch it.
 
 ### 4. Work the pass
 When the chef-de-rang hands back, check the plate before it ships. **Proof, not claims** — a plate is passed on shown command output, never on a "tests pass" assertion. For each check, *run the command yourself*, read the actual output, and only then judge:
@@ -49,7 +56,7 @@ When the chef-de-rang hands back, check the plate before it ships. **Proof, not 
 
 Record the verification on the ticket's **Tests** section: the commands run and their result (e.g. `vitest run → 12 passed`, `tsc --noEmit → clean`). An "I'm done" with no command output behind it is not done.
 
-A plate that fails goes back to the same ticket with notes; Status stays **Firing**, it does not ship. Only when the output proves it: Status → **Served**, update `Board.md`, fire the next.
+A plate that fails goes back to the same ticket with notes; Status stays **Firing**, it does not ship. On Claude Code, **escalate the model on the re-fire**: a bounced plate re-dispatches at **Opus** even if its `Difficulty` is `tidy` (Sonnet→Opus) — the harder second attempt earns the stronger model. Only when the output proves it: Status → **Served**, update `Board.md`, fire the next.
 
 ### 5. Last orders
 When every ticket is Served, say so plainly and point at what the plan parked under "beyond MVP." Don't invent new courses.
@@ -62,6 +69,8 @@ One per feature, at `service/order-NN-<slug>.md`. This is the durable memory —
 # Order NN · <feature name> · Status: To fire
 **Covers:** <plan phase / tasks this ticket delivers>
 **Depends on:** <other tickets, or none>
+**Difficulty:** tidy|hard
+**HITL:** yes|no
 
 ## Done when  (acceptance — checked at the pass)
 - [ ] <criterion, observable>

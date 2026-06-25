@@ -20,4 +20,10 @@ describe("cli", () => {
     const names = program.commands.map((c) => c.name());
     expect(names).toContain("list");
   });
+
+  it("has a check subcommand", () => {
+    const program = buildProgram();
+    const names = program.commands.map((c) => c.name());
+    expect(names).toContain("check");
+  });
 });

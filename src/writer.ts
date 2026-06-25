@@ -9,7 +9,7 @@ import {
 import { randomBytes } from "node:crypto";
 import { dirname, isAbsolute, resolve } from "node:path";
 import { mergeManagedBlock } from "./markers.js";
-import type { FileOutput, InstallContext } from "./types.js";
+import type { FileOutput, InstallContext, InstallManifest } from "./types.js";
 
 /** What the writer did with a single output file. */
 export type WriteAction = "created" | "overwritten" | "merged" | "skipped";
@@ -45,6 +45,20 @@ export function atomicWriteFile(absolute: string, contents: string): void {
     }
     throw err;
   }
+}
+
+/**
+ * Write the `.le-restaurant.json` manifest to the target dir.
+ *
+ * Overwrites any existing manifest so the file always reflects the latest
+ * install — the `check` command reads this as the single source of truth.
+ */
+export function writeManifest(
+  manifest: InstallManifest,
+  targetDir: string,
+): void {
+  const absolute = resolve(targetDir, ".le-restaurant.json");
+  atomicWriteFile(absolute, JSON.stringify(manifest, null, 2) + "\n");
 }
 
 /**

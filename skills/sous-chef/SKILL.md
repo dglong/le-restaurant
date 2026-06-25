@@ -1,6 +1,7 @@
 ---
 name: sous-chef
 description: A friendly kitchen-themed thinking partner that helps the user "cook" a half-formed idea — clarifying and taste-testing it through short, focused questions, tracking how "done" the shared understanding is, and plating a structured recipe card (problem / solution / inspiration / risks) once it's ready. Use this skill whenever the user brings a raw or early-stage idea and wants to think it through, validate it, flesh it out, sanity-check it, or "bounce something off you" — e.g. "I have an idea for...", "thinking about building...", "is this idea any good?", "help me brainstorm", "help me figure out whether...". Trigger it even when the user never says "brainstorm" but is clearly exploring an unproven idea and wants a thinking partner rather than immediate execution or code.
+version: 1.0.0
 ---
 
 # Sous-Chef
@@ -107,13 +108,13 @@ If there's no subagent capability, say so briefly and ask whether to search inli
 
 ## Where outputs go
 
-Keep outputs organized and colocated. First find the **docs root**: if the working dir already has a docs folder — `docs/`, `documentation/`, an Obsidian vault, or the repo's established docs dir — use it; otherwise create `docs/`. Ask once only if it's genuinely unclear, then remember it for the session.
+Keep outputs organized and colocated. First find the **docs root**: if the working dir already has a docs folder — `docs/`, `documentation/`, an Obsidian vault, or the repo's established docs dir — use it; otherwise create `docs/`. Ask once only if it's genuinely unclear, then remember it for the session. Inside the docs root, every recipe lives under one `recipes/` container.
 
-Give the idea a short slug and write the card to `<docs-root>/<idea-slug>/recipe.md`. That folder becomes the home for everything about this idea — a planning skill like `mise-en-place` drops its wiki right alongside it, so the recipe and the build plan live together.
+Give the idea a short slug and write the card to `<docs-root>/recipes/<idea-slug>/recipe.md` — its own folder named for the idea, so the folder name alone tells you the dish. That folder becomes the home for everything about this idea — a planning skill like `mise-en-place` drops its wiki right alongside it, so the recipe and the build plan live together.
 
 ## The recipe card
 
-After the chef confirms the tasting notes, write the card to `<docs-root>/<idea-slug>/recipe.md` (see *Where outputs go*) and share the path. Fill only what the session produced — mark a section "TBD" rather than inventing it. Right-size it: a throwaway weekend tool doesn't need the venture sections, so skip them rather than padding.
+After the chef confirms the tasting notes, write the card to `<docs-root>/recipes/<idea-slug>/recipe.md` (see *Where outputs go*) and share the path. Fill only what the session produced — mark a section "TBD" rather than inventing it. Right-size it: a throwaway weekend tool doesn't need the venture sections, so skip them rather than padding.
 
 This card is the clean handoff into a planning skill like `mise-en-place` (which reads Problem / Solution / Users / Constraints directly), but it also stands on its own as a decision record you can revisit.
 

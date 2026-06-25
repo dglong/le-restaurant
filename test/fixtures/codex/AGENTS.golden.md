@@ -1,7 +1,9 @@
 <!-- le-restaurant:start -->
 <!-- Managed by le-restaurant. Do not edit between these markers; re-run the installer to update. -->
 
-## Skill: alpha
+> **Note:** Model-aware dispatch (Sonnet/Opus selection) is a no-op on Codex — chef-de-rang runs on the session model. The HITL gate and difficulty tagging still apply.
+
+## Skill: alpha (v0.0.0)
 
 The alpha skill.
 
@@ -9,7 +11,7 @@ The alpha skill.
 
 Do alpha things.
 
-## Skill: beta
+## Skill: beta (v0.0.0)
 
 The beta skill.
 

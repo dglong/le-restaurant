@@ -48,6 +48,25 @@ describe("gemini import adapter", () => {
     );
   });
 
+  it("each skill file carries the skill version", () => {
+    const outputs = geminiAdapter.translate([alpha, beta], ctxFor("merge"));
+    const alphaFile = outputs.find((o) => o.path === ".gemini/skills/alpha.md");
+    const betaFile = outputs.find((o) => o.path === ".gemini/skills/beta.md");
+    // alpha and beta both have version "0.0.0"
+    expect(alphaFile?.contents).toContain("0.0.0");
+    expect(betaFile?.contents).toContain("0.0.0");
+  });
+
+  it("GEMINI.md contains the model-aware dispatch no-op notice", () => {
+    const outputs = geminiAdapter.translate([alpha, beta], ctxFor("merge"));
+    const geminiMd = outputs.find((o) => o.path === "GEMINI.md");
+    expect(geminiMd?.contents.toLowerCase()).toContain("model-aware dispatch");
+    expect(geminiMd?.contents.toLowerCase()).toContain("no-op");
+    // HITL guidance still present, session-model acknowledged
+    expect(geminiMd?.contents.toLowerCase()).toContain("hitl");
+    expect(geminiMd?.contents.toLowerCase()).toContain("session model");
+  });
+
   it("re-run is idempotent — GEMINI.md import block does not duplicate", () => {
     const outputs = geminiAdapter.translate([alpha, beta], ctxFor("merge"));
     writeOutputs(outputs, ctxFor("merge"));
